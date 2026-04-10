@@ -1,97 +1,109 @@
-# Skaner i kolorowanie składni (HTML)
+# Scanner and Syntax Highlighting (HTML)
 
-Projekt implementuje skaner (lexer) dla uproszczonego języka programowania i generuje pokolorowany kod jako plik HTML.
+This project implements a scanner (lexer) for a simplified programming language and generates highlighted code as an HTML file.
 
-## Założony format wejściowy
+## Assumed Input Format
 
-Uproszczony język C-podobny:
-- słowa kluczowe: `if`, `else`, `while`, `for`, `return`, `int`, `float`, `bool`, `true`, `false`, `void`, `function`, `var`
-- identyfikatory: litera lub `_`, dalej litery/cyfry/`_`
-- liczby: całkowite i zmiennoprzecinkowe (np. `12`, `3.14`)
-- napisy: cudzysłowy `"..."`, obsługa sekwencji `\`
-- komentarze: `// ...` oraz `/* ... */`
-- operatory: `+ - * / % = == != < <= > >= && || !`
-- delimitery: `() {} [] ; , . :`
+A simplified C-like language:
+- **Keywords:** `if`, `else`, `while`, `for`, `return`, `int`, `float`, `bool`, `true`, `false`, `void`, `function`, `var`
+- **Identifiers:** a letter or `_`, followed by letters/digits/`_`
+- **Numbers:** integers and floating-point (e.g., `12`, `3.14`)
+- **Strings:** double quotes `"..."`, supports escape sequences `\`
+- **Comments:** `// ...` and `/* ... */`
+- **Operators:** `+ - * / % = == != < <= > >= && || !`
+- **Delimiters:** `() {} [] ; , . :`
 
-## Tabela tokenów
+## Token Table
 
-| Token | Opis | Przykłady |
+| Token | Description | Examples |
 |---|---|---|
-| `KEYWORD` | słowa kluczowe języka | `if`, `return`, `int` |
-| `IDENTIFIER` | nazwy zmiennych/funkcji | `x`, `licznik_1`, `main` |
-| `NUMBER` | liczby całkowite i float | `42`, `10.5` |
-| `STRING` | literały tekstowe | `"Ala ma kota"` |
-| `COMMENT` | komentarze jedno- i wieloliniowe | `// opis`, `/* opis */` |
-| `OPERATOR` | operatory arytm./log./por. | `+`, `==`, `&&`, `!` |
-| `DELIMITER` | nawiasy i separatory | `(`, `)`, `{`, `;`, `,` |
-| `WHITESPACE` | białe znaki (zachowanie układu) | spacja, tab, nowa linia |
-| `UNKNOWN` | nieznany znak/niezamknięty token | np. samotny znak spoza alfabetu |
+| `KEYWORD` | Reserved language keywords | `if`, `return`, `int` |
+| `IDENTIFIER` | Variable/function names | `x`, `counter_1`, `main` |
+| `NUMBER` | Integers and floats | `42`, `10.5` |
+| `STRING` | Text literals | `"Hello world"` |
+| `COMMENT` | Single and multi-line comments | `// desc`, `/* desc */` |
+| `OPERATOR` | Arithm./log./comp. operators | `+`, `==`, `&&`, `!` |
+| `DELIMITER` | Brackets and separators | `(`, `)`, `{`, `;`, `,` |
+| `WHITESPACE` | White characters (layout preservation) | space, tab, newline |
+| `UNKNOWN` | Unrecognized char/unclosed token | e.g., stray character |
 
-## Diagram przejść (DFA, uproszczony)
+## State Transition Diagram (Simplified DFA)
 
 ```mermaid
 flowchart TD
-	S([START]) -->|biały znak| WS[WHITESPACE]
-	S -->|litera/_| ID[IDENTIFIER/KEYWORD]
-	S -->|cyfra| NUM[NUMBER]
-	S -->|"| STR[STRING]
-	S -->|/| SLASH{next}
-	S -->|operator| OP[OPERATOR]
-	S -->|delimiter| DEL[DELIMITER]
-	S -->|inny znak| UNK[UNKNOWN]
+    S([START]) -->|whitespace| WS[WHITESPACE]
+    S -->|letter/_| ID[IDENTIFIER/KEYWORD]
+    S -->|digit| NUM[NUMBER]
+    S -->|"| STR[STRING]
+    S -->|/| SLASH{next}
+    S -->|operator| OP[OPERATOR]
+    S -->|delimiter| DEL[DELIMITER]
+    S -->|other char| UNK[UNKNOWN]
 
-	ID -->|litera/cyfra/_| ID
-	ID --> E([EMIT])
+    ID -->|letter/digit/_| ID
+    ID --> E([EMIT])
 
-	NUM -->|cyfra| NUM
-	NUM -->|. + cyfra| NUMF[NUMBER_FLOAT]
-	NUMF -->|cyfra| NUMF
-	NUM --> E
-	NUMF --> E
+    NUM -->|digit| NUM
+    NUM -->|. + digit| NUMF[NUMBER_FLOAT]
+    NUMF -->|digit| NUMF
+    NUM --> E
+    NUMF --> E
 
-	STR -->|\\ + dowolny| STR
-	STR -->|"| E
-	STR -->|EOF| UNK
+    STR -->|\\ + any| STR
+    STR -->|"| E
+    STR -->|EOF| UNK
 
-	SLASH -->|/| C1[LINE_COMMENT]
-	SLASH -->|*| C2[BLOCK_COMMENT]
-	SLASH -->|inne| OP
+    SLASH -->|/| C1[LINE_COMMENT]
+    SLASH -->|*| C2[BLOCK_COMMENT]
+    SLASH -->|other| OP
 
-	C1 -->|do \n| C1
-	C1 --> E
+    C1 -->|until \n| C1
+    C1 --> E
 
-	C2 -->|dowolny znak| C2
-	C2 -->|*/| E
-	C2 -->|EOF| UNK
+    C2 -->|any char| C2
+    C2 -->|*/| E
+    C2 -->|EOF| UNK
 
-	WS -->|biały znak| WS
-	WS --> E
+    WS -->|whitespace| WS
+    WS --> E
 
-	OP --> E
-	DEL --> E
-	UNK --> E
+    OP --> E
+    DEL --> E
+    UNK --> E
 ```
+# How It Works
+## The Program:
+1. Reads the entire input file. 
+2. Tokenizes the text according to the token table. 
+3. Generates HTML with syntax highlighting. 
+4. Preserves the original text layout (spaces/tabs/newlines) using the  tag.
 
-## Działanie programu
+## Color Scheme
+1. Keywords: Blue (#569cd6, bold)
+2. Identifiers: Light Blue (#9cdcfe)
+3. Numbers: Light Green (#b5cea8)
+4. Strings: Orange (#ce9178)
+5. Comments: Green (#6a9955, italic)
+6. Operators: Light Gray (#d4d4d4)
+7. Delimiters: Yellow (#dcdcaa)
+8. Unknown tokens: Red (#f44747, underlined)
 
-Program:
-1. wczytuje cały plik wejściowy,
-2. tokenizuje tekst zgodnie z tabelą tokenów,
-3. zapisuje wynik do pliku HTML,
-4. zachowuje układ tekstu z wejścia (spacje/taby/nowe linie) przez render w `<pre>`.
-
-## Uruchomienie
-
-Po zbudowaniu uruchom:
-
+# Building and Running
+- Using CMake (From the project root directory):
+```
+mkdir build
+cd build
+cmake ../skaner
+make
+./skaner <input_file> <output_html_file>
+```
+- Direct Compilation (From the skaner/ directory):
 ```bash
-./build/Debug/skaner.exe <plik_wejsciowy> <plik_wyjsciowy_html>
+cd skaner
+g++ -std=c++20 -o skaner main.cpp
+./skaner <input_file> <output_html_file>
 ```
-
-Przykład:
-
-```bash
-./build/Debug/skaner.exe input.txt output.html
+- Example Usage:
 ```
-
-Następnie otwórz `output.html` w przeglądarce.
+./skaner example.cpp output.html
+```  
