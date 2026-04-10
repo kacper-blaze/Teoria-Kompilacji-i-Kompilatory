@@ -1,0 +1,11 @@
+start: statement+
+
+statement: circle
+         | line
+
+circle: "circle" NUMBER NUMBER NUMBER
+line: "line" NUMBER NUMBER NUMBER NUMBER
+
+%import common.NUMBER
+%import common.WS
+%ignore WS
