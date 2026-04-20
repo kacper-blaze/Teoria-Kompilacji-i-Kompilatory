@@ -85,52 +85,144 @@ The program generates an SVG file, for example:
 * `canvas width height`
 * `color name`
 * `color #RRGGBB`
-
-### (Optional Extensions)
-
-* `repeat n { ... }`
 * `translate x y`
 * `scale s`
+
+### Variables
+
+* `let x = 10`
+* `x = x + 1`
+
+### Control flow
+
+* `if cond { ... } else if cond { ... } else { ... }`
+* `while cond { ... }`
+* `for i = 0 to 10 { ... }` (optionally `step expr`)
+* `repeat n { ... }`
+* `break`    – exit the innermost loop
+* `continue` – skip to the next loop iteration
+
+### Procedures
+
+```
+proc star(cx, cy, r) {
+    circle cx cy r
+}
+
+star(100, 100, 40)
+```
+
+* declaration: `proc NAME(p1, p2, ...) { ... }`
+* call:        `NAME(a1, a2, ...)`
+* `return expr` is supported (optional value)
+
+### Expressions
+
+* arithmetic: `+ - * / %`
+* comparison: `== != < > <= >=`
+* logical:    `and`, `or`, `not`
+* literals:   numbers, strings (`"hello"`), `true`, `false`
+* grouping:   `( ... )`
+* function calls inside expressions
+
+### Comments
+
+* `// line comment`
+* `/* block comment */`
 
 ---
 
 ## 🧩 Tokens
 
-* KEYWORDS: `circle`, `line`, `rect`, `canvas`, `color`
-* NUMBER: integers and floating-point numbers
-* IDENTIFIER: names (e.g., color names)
-* HEX_COLOR: `#RRGGBB`
-* SYMBOLS: `{ }`
+### Keywords (reserved)
+
+| Token       | Lexem                                                                                       |
+|-------------|---------------------------------------------------------------------------------------------|
+| shape kw    | `canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`                           |
+| control kw  | `if`, `else`, `while`, `for`, `to`, `step`, `repeat`, `return`, `break`, `continue`         |
+| binding kw  | `let`, `proc`                                                                               |
+| logical kw  | `and`, `or`, `not`, `true`, `false`                                                         |
+
+### Literals & identifiers
+
+| Token        | Pattern (regex)                          | Example          |
+|--------------|------------------------------------------|------------------|
+| `NUMBER`     | `[0-9]+ ( "." [0-9]+ )?`                 | `42`, `3.14`     |
+| `IDENTIFIER` | `[a-zA-Z_][a-zA-Z0-9_]*`                 | `red`, `cx`      |
+| `STRING`     | `"([^"\\]\|\\.)*"` (escaped string)      | `"hello"`        |
+| `HEX_COLOR`  | `#[0-9a-fA-F]{6}`                        | `#FF00AA`        |
+
+### Operators & punctuation
+
+| Token       | Lexem(s)                              |
+|-------------|---------------------------------------|
+| arithmetic  | `+`  `-`  `*`  `/`  `%`               |
+| comparison  | `==` `!=` `<` `>` `<=` `>=`           |
+| assignment  | `=`                                   |
+| grouping    | `(`  `)`  `{`  `}`                    |
+| separator   | `,`                                   |
+
+### Ignored
+
+| Token         | Pattern             | Action  |
+|---------------|---------------------|---------|
+| `WS`          | `[ \t\r\n]+`        | skipped |
+| `CPP_COMMENT` | `//[^\n]*`          | skipped |
+| `C_COMMENT`   | `/* ... */`         | skipped |
 
 ---
 
 ## 📜 Grammar (Lark)
 
+The complete grammar lives in [`grammar.lark`](grammar.lark). High-level summary:
+
 ```
-?start: program
+program     ::= statement*
 
-program: statement*
+statement   ::= var_decl | assign_stmt
+              | if_stmt  | while_stmt | for_stmt | repeat_stmt
+              | break_stmt | continue_stmt
+              | proc_decl | return_stmt | call_stmt
+              | shape_stmt
 
-statement: canvas
-         | circle
-         | line
-         | rect
-         | color
+var_decl    ::= "let" IDENTIFIER "=" expr
+assign_stmt ::= IDENTIFIER "=" expr
 
-canvas: "canvas" NUMBER NUMBER
+if_stmt     ::= "if" expr block ("else" (if_stmt | block))?
+while_stmt  ::= "while" expr block
+for_stmt    ::= "for" IDENTIFIER "=" expr "to" expr ("step" expr)? block
+repeat_stmt ::= "repeat" expr block
 
-circle: "circle" NUMBER NUMBER NUMBER
-line: "line" NUMBER NUMBER NUMBER NUMBER
-rect: "rect" NUMBER NUMBER NUMBER NUMBER
+break_stmt    ::= "break"
+continue_stmt ::= "continue"
 
-color: "color" (IDENTIFIER | HEX)
+proc_decl   ::= "proc" IDENTIFIER "(" params? ")" block
+params      ::= IDENTIFIER ("," IDENTIFIER)*
+return_stmt ::= "return" expr?
+call_stmt   ::= call
+call        ::= IDENTIFIER "(" args? ")"
+args        ::= expr ("," expr)*
 
-%import common.NUMBER
-%import common.CNAME -> IDENTIFIER
-%import common.WS
-%ignore WS
+shape_stmt  ::= "canvas"    expr expr
+              | "circle"    expr expr expr
+              | "line"      expr expr expr expr
+              | "rect"      expr expr expr expr
+              | "color"     (HEX_COLOR | STRING | IDENTIFIER)
+              | "translate" expr expr
+              | "scale"     expr
 
-HEX: /#[0-9a-fA-F]{6}/
+block       ::= "{" statement* "}"
+
+expr        ::= or_expr
+or_expr     ::= and_expr ("or" and_expr)*
+and_expr    ::= not_expr ("and" not_expr)*
+not_expr    ::= "not" not_expr | comparison
+comparison  ::= sum (("==" | "!=" | "<=" | ">=" | "<" | ">") sum)?
+sum         ::= product (("+" | "-") product)*
+product     ::= unary (("*" | "/" | "%") unary)*
+unary       ::= "-" unary | atom
+atom        ::= NUMBER | STRING | "true" | "false"
+              | call | IDENTIFIER | "(" expr ")"
 ```
 
 ---

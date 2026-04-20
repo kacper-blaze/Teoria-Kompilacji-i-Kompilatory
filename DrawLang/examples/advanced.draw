@@ -1,0 +1,66 @@
+// =====================================================================
+// DrawLang showcase: variables, control flow, procedures, expressions
+// =====================================================================
+
+canvas 400 400
+color #112233
+
+// ----- variables ------------------------------------------------------
+let cx = 200
+let cy = 200
+let n  = 12
+
+// ----- procedure with parameters --------------------------------------
+proc ring(x, y, radius, count) {
+    let i = 0
+    while i < count {
+        let angle = i * 30
+        // dummy "position" computed from index (no trig yet, just demo math)
+        let px = x + radius - i * 2
+        let py = y + i * 2
+        circle px py 5
+        i = i + 1
+    }
+}
+
+// ----- if / else ------------------------------------------------------
+if n > 10 {
+    color red
+} else if n > 5 {
+    color yellow
+} else {
+    color green
+}
+
+// ----- for loop with step --------------------------------------------
+for r = 20 to 100 step 20 {
+    circle cx cy r
+}
+
+// ----- while loop with break/continue --------------------------------
+let k = 0
+while k < 10 {
+    k = k + 1
+    if k == 5 { continue }
+    if k > 7  { break }
+    rect (k * 30) 350 20 20
+}
+
+// ----- string color (e.g. CSS named or custom palette) ---------------
+color "rebeccapurple"
+
+// ----- repeat ---------------------------------------------------------
+repeat 3 {
+    line 0 0 400 400
+}
+
+// ----- procedure call -------------------------------------------------
+ring(cx, cy, 80, n)
+
+// ----- procedure with return -----------------------------------------
+proc double(x) {
+    return x * 2
+}
+
+let big = double(50)
+circle cx cy big

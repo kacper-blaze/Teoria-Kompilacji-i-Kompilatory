@@ -1,11 +1,121 @@
-start: statement+
+// =====================================================================
+// DrawLang grammar (Lark, Earley parser)
+// =====================================================================
 
-statement: circle
-         | line
+?start: program
 
-circle: "circle" NUMBER NUMBER NUMBER
-line: "line" NUMBER NUMBER NUMBER NUMBER
+program: statement*
+
+// ---------------------------------------------------------------------
+// Statements
+// ---------------------------------------------------------------------
+
+?statement: var_decl
+          | assign_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | repeat_stmt
+          | proc_decl
+          | return_stmt
+          | break_stmt
+          | continue_stmt
+          | shape_stmt
+          | call_stmt
+
+block: "{" statement* "}"
+
+// --- variables --------------------------------------------------------
+var_decl:    "let" IDENTIFIER "=" expr
+assign_stmt: IDENTIFIER "=" expr
+
+// --- control flow -----------------------------------------------------
+if_stmt:     "if" expr block ("else" (if_stmt | block))?
+
+while_stmt:  "while" expr block
+
+for_stmt:    "for" IDENTIFIER "=" expr "to" expr ("step" expr)? block
+
+repeat_stmt: "repeat" expr block
+
+break_stmt:    "break"
+continue_stmt: "continue"
+
+// --- procedures -------------------------------------------------------
+proc_decl:   "proc" IDENTIFIER "(" params? ")" block
+params:      IDENTIFIER ("," IDENTIFIER)*
+
+return_stmt: "return" [expr]
+
+call_stmt:   call
+call:        IDENTIFIER "(" args? ")"
+args:        expr ("," expr)*
+
+// ---------------------------------------------------------------------
+// Built-in shape / setting statements
+// ---------------------------------------------------------------------
+
+?shape_stmt: canvas_stmt
+           | circle_stmt
+           | line_stmt
+           | rect_stmt
+           | color_stmt
+           | translate_stmt
+           | scale_stmt
+
+canvas_stmt:    "canvas"    expr expr
+circle_stmt:    "circle"    expr expr expr
+line_stmt:      "line"      expr expr expr expr
+rect_stmt:      "rect"      expr expr expr expr
+
+color_stmt:     "color" color_value
+color_value:    HEX_COLOR | STRING | IDENTIFIER
+
+translate_stmt: "translate" expr expr
+scale_stmt:     "scale"     expr
+
+// ---------------------------------------------------------------------
+// Expressions (precedence: or < and < not < cmp < +- < */ < unary < atom)
+// ---------------------------------------------------------------------
+
+?expr:       or_expr
+
+?or_expr:    and_expr ("or" and_expr)*
+?and_expr:   not_expr ("and" not_expr)*
+?not_expr:   "not" not_expr        -> not_op
+           | comparison
+?comparison: sum (cmp_op sum)?
+!cmp_op:     "==" | "!=" | "<=" | ">=" | "<" | ">"
+
+?sum:        product (add_op product)*
+!add_op:     "+" | "-"
+?product:    unary (mul_op unary)*
+!mul_op:     "*" | "/" | "%"
+?unary:      "-" unary              -> neg
+           | atom
+
+?atom: NUMBER                       -> number
+     | STRING                       -> string
+     | bool_lit
+     | call
+     | IDENTIFIER                   -> var
+     | "(" expr ")"
+
+bool_lit: "true" | "false"
+
+// ---------------------------------------------------------------------
+// Terminals
+// ---------------------------------------------------------------------
+
+HEX_COLOR: /#[0-9a-fA-F]{6}/
 
 %import common.NUMBER
+%import common.ESCAPED_STRING -> STRING
+%import common.CNAME -> IDENTIFIER
 %import common.WS
+%import common.CPP_COMMENT
+%import common.C_COMMENT
+
 %ignore WS
+%ignore CPP_COMMENT
+%ignore C_COMMENT

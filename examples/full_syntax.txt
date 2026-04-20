@@ -1,0 +1,33 @@
+/* Więcej kodów do testowania */
+
+function fibonacci(n) {
+    // Komentarz jedno-liniowy
+    if (n <= 1) {
+        return n;
+    }
+    
+    int fib = 0;
+    int i = 2;
+    float value = 3.14;
+    bool flag = true;
+    
+    /* Komentarz
+       wieloliniowy */
+    
+    while (i <= n) {
+        fib = fib + i;
+        i = i + 1;
+    }
+    
+    return fib;
+}
+
+// Zmienne i wyrażenia
+var x = 42;
+var msg = "Hello, world!";
+var result = x * 2 + 3.5 - 1;
+
+// Operatory porównania
+if (x >= 10 && value <= 5.0 || flag == false) {
+    return msg;
+}

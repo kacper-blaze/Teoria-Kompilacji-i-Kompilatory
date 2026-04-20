@@ -1,0 +1,28 @@
+// Testy przypadków brzegowych
+
+// Liczby
+int zero = 0;
+float decimal = 123.456;
+float tiny = 0.001;
+
+// Stringi ze specjalnymi znakami
+var s1 = "Test \"escape\" sequence";
+var s2 = "Nowa linia\n";
+
+// Identyfikatory z podkreślnikami
+var my_variable_name = 100;
+var _private = 200;
+var var123 = 300;
+
+// Operatory dwuznakowe
+if (a == b && c != d || e <= 500 && f >= 100) {
+    int result = 1;
+}
+
+// Delimitery
+int arr[10];
+void func() {
+    ;
+}
+float {
+}
