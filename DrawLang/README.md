@@ -1,51 +1,51 @@
-# 🎨 DrawLang – A Domain-Specific Language for Vector Graphics
+# DrawLang – język dziedzinowy do grafiki wektorowej
 
-## 📌 Authors
+## Autorzy
 
 * Kacper Kobieluch – [kkobieluch@student.agh.edu.pl](mailto:kkobieluch@student.agh.edu.pl)
 * Kacper Kustra – [kkustra@student.agh.edu.pl](mailto:kkustra@student.agh.edu.pl)
 
 ---
 
-## 🛠️ Implementation Language
+## Język implementacji
 
 * Python 3.11+
 
 ---
 
-## ⚙️ Parser Generator
+## Generator parsera
 
-This project uses:
+Projekt korzysta z biblioteki:
 
 * **Lark (Python parsing library)**
 
-Alternative tools:
+Rozważane alternatywy:
 
 * ANTLR4
 * PLY (Python Lex-Yacc)
 * Bison / YACC
 
-Lark was chosen because:
+Lark został wybrany, ponieważ:
 
-* it is easy to use and beginner-friendly
-* it does not require external code generation
-* it integrates directly with Python
-
----
-
-## 🎯 Project Goal
-
-DrawLang is a custom domain-specific language (DSL) designed to describe vector graphics using simple textual commands.
-
-The program parses DrawLang code and generates:
-
-* SVG images
+* jest prosty w użyciu i przyjazny dla początkujących,
+* nie wymaga zewnętrznej generacji kodu,
+* integruje się bezpośrednio z Pythonem.
 
 ---
 
-## 📥 Input Format
+## Cel projektu
 
-Example program:
+DrawLang to autorski język dziedzinowy (DSL) służący do opisywania grafiki wektorowej za pomocą prostych komend tekstowych.
+
+Program parsuje kod w DrawLang i generuje:
+
+* obrazy w formacie SVG.
+
+---
+
+## Format wejściowy
+
+Przykładowy program:
 
 ```
 canvas 200 200
@@ -59,9 +59,9 @@ circle 50 50 20
 
 ---
 
-## 📤 Output Format
+## Format wyjściowy
 
-The program generates an SVG file, for example:
+Wynikiem działania programu jest plik SVG, na przykład:
 
 ```xml
 <svg width="200" height="200">
@@ -72,15 +72,15 @@ The program generates an SVG file, for example:
 
 ---
 
-## ✨ Features
+## Funkcjonalności
 
-### Basic Shapes
+### Podstawowe kształty
 
 * `circle x y r`
 * `line x1 y1 x2 y2`
 * `rect x y width height`
 
-### Settings
+### Ustawienia sceny
 
 * `canvas width height`
 * `color name`
@@ -88,21 +88,21 @@ The program generates an SVG file, for example:
 * `translate x y`
 * `scale s`
 
-### Variables
+### Zmienne
 
 * `let x = 10`
 * `x = x + 1`
 
-### Control flow
+### Sterowanie przepływem
 
 * `if cond { ... } else if cond { ... } else { ... }`
 * `while cond { ... }`
-* `for i = 0 to 10 { ... }` (optionally `step expr`)
+* `for i = 0 to 10 { ... }` (opcjonalnie `step expr`)
 * `repeat n { ... }`
-* `break`    – exit the innermost loop
-* `continue` – skip to the next loop iteration
+* `break`    – wyjście z najbliższej pętli
+* `continue` – przejście do kolejnej iteracji
 
-### Procedures
+### Procedury
 
 ```
 proc star(cx, cy, r) {
@@ -112,151 +112,110 @@ proc star(cx, cy, r) {
 star(100, 100, 40)
 ```
 
-* declaration: `proc NAME(p1, p2, ...) { ... }`
-* call:        `NAME(a1, a2, ...)`
-* `return expr` is supported (optional value)
+* deklaracja: `proc NAZWA(p1, p2, ...) { ... }`
+* wywołanie: `NAZWA(a1, a2, ...)`
+* obsługiwana jest instrukcja `return expr` (wartość opcjonalna)
 
-### Expressions
+### Wyrażenia
 
-* arithmetic: `+ - * / %`
-* comparison: `== != < > <= >=`
-* logical:    `and`, `or`, `not`
-* literals:   numbers, strings (`"hello"`), `true`, `false`
-* grouping:   `( ... )`
-* function calls inside expressions
+* arytmetyczne: `+ - * / %`
+* porównania:  `== != < > <= >=`
+* logiczne:    `and`, `or`, `not`
+* literały:    liczby, łańcuchy (`"hello"`), `true`, `false`
+* grupowanie:  `( ... )`
+* wywołania funkcji wewnątrz wyrażeń
 
-### Comments
+### Komentarze
 
-* `// line comment`
-* `/* block comment */`
+* `// komentarz liniowy`
+* `/* komentarz blokowy */`
 
 ---
 
-## 🧩 Tokens
+## Tokeny
 
-### Keywords (reserved)
+### Słowa kluczowe (zarezerwowane)
 
-| Token       | Lexem                                                                                       |
-|-------------|---------------------------------------------------------------------------------------------|
-| shape kw    | `canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`                           |
-| control kw  | `if`, `else`, `while`, `for`, `to`, `step`, `repeat`, `return`, `break`, `continue`         |
-| binding kw  | `let`, `proc`                                                                               |
-| logical kw  | `and`, `or`, `not`, `true`, `false`                                                         |
+| Kategoria             | Leksemy                                                                             |
+|-----------------------|-------------------------------------------------------------------------------------|
+| kształty / scena      | `canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`                   |
+| sterowanie przepływem | `if`, `else`, `while`, `for`, `to`, `step`, `repeat`, `return`, `break`, `continue` |
+| deklaracje            | `let`, `proc`                                                                       |
+| logiczne / literały   | `and`, `or`, `not`, `true`, `false`                                                 |
 
-### Literals & identifiers
+### Literały i identyfikatory
 
-| Token        | Pattern (regex)                          | Example          |
+| Token        | Wzorzec (regex)                          | Przykład         |
 |--------------|------------------------------------------|------------------|
 | `NUMBER`     | `[0-9]+ ( "." [0-9]+ )?`                 | `42`, `3.14`     |
 | `IDENTIFIER` | `[a-zA-Z_][a-zA-Z0-9_]*`                 | `red`, `cx`      |
-| `STRING`     | `"([^"\\]\|\\.)*"` (escaped string)      | `"hello"`        |
+| `STRING`     | `"([^"\\]\|\\.)*"` (z sekwencjami `\`)   | `"hello"`        |
 | `HEX_COLOR`  | `#[0-9a-fA-F]{6}`                        | `#FF00AA`        |
 
-### Operators & punctuation
+### Operatory i znaki interpunkcyjne
 
-| Token       | Lexem(s)                              |
+| Kategoria   | Leksemy                               |
 |-------------|---------------------------------------|
-| arithmetic  | `+`  `-`  `*`  `/`  `%`               |
-| comparison  | `==` `!=` `<` `>` `<=` `>=`           |
-| assignment  | `=`                                   |
-| grouping    | `(`  `)`  `{`  `}`                    |
+| arytmetyczne| `+`  `-`  `*`  `/`  `%`               |
+| porównania  | `==` `!=` `<` `>` `<=` `>=`           |
+| przypisanie | `=`                                   |
+| grupowanie  | `(`  `)`  `{`  `}`                    |
 | separator   | `,`                                   |
 
-### Ignored
+### Pomijane
 
-| Token         | Pattern             | Action  |
-|---------------|---------------------|---------|
-| `WS`          | `[ \t\r\n]+`        | skipped |
-| `CPP_COMMENT` | `//[^\n]*`          | skipped |
-| `C_COMMENT`   | `/* ... */`         | skipped |
-
----
-
-## 📜 Grammar (Lark)
-
-The complete grammar lives in [`grammar.lark`](grammar.lark). High-level summary:
-
-```
-program     ::= statement*
-
-statement   ::= var_decl | assign_stmt
-              | if_stmt  | while_stmt | for_stmt | repeat_stmt
-              | break_stmt | continue_stmt
-              | proc_decl | return_stmt | call_stmt
-              | shape_stmt
-
-var_decl    ::= "let" IDENTIFIER "=" expr
-assign_stmt ::= IDENTIFIER "=" expr
-
-if_stmt     ::= "if" expr block ("else" (if_stmt | block))?
-while_stmt  ::= "while" expr block
-for_stmt    ::= "for" IDENTIFIER "=" expr "to" expr ("step" expr)? block
-repeat_stmt ::= "repeat" expr block
-
-break_stmt    ::= "break"
-continue_stmt ::= "continue"
-
-proc_decl   ::= "proc" IDENTIFIER "(" params? ")" block
-params      ::= IDENTIFIER ("," IDENTIFIER)*
-return_stmt ::= "return" expr?
-call_stmt   ::= call
-call        ::= IDENTIFIER "(" args? ")"
-args        ::= expr ("," expr)*
-
-shape_stmt  ::= "canvas"    expr expr
-              | "circle"    expr expr expr
-              | "line"      expr expr expr expr
-              | "rect"      expr expr expr expr
-              | "color"     (HEX_COLOR | STRING | IDENTIFIER)
-              | "translate" expr expr
-              | "scale"     expr
-
-block       ::= "{" statement* "}"
-
-expr        ::= or_expr
-or_expr     ::= and_expr ("or" and_expr)*
-and_expr    ::= not_expr ("and" not_expr)*
-not_expr    ::= "not" not_expr | comparison
-comparison  ::= sum (("==" | "!=" | "<=" | ">=" | "<" | ">") sum)?
-sum         ::= product (("+" | "-") product)*
-product     ::= unary (("*" | "/" | "%") unary)*
-unary       ::= "-" unary | atom
-atom        ::= NUMBER | STRING | "true" | "false"
-              | call | IDENTIFIER | "(" expr ")"
-```
+| Token         | Wzorzec             | Akcja    |
+|---------------|---------------------|----------|
+| `WS`          | `[ \t\r\n]+`        | pomijany |
+| `CPP_COMMENT` | `//[^\n]*`          | pomijany |
+| `C_COMMENT`   | `/* ... */`         | pomijany |
 
 ---
 
-## 🔄 Processing Pipeline
+## Gramatyka
 
-1. Lexical analysis (tokenization)
-2. Syntax analysis (parsing using Lark)
-3. Building an internal representation (scene model)
-4. Interpreting commands
-5. Generating SVG output
+Pełna definicja gramatyki znajduje się w pliku [`grammar.lark`](grammar.lark).
+W skrócie obejmuje ona:
+
+* deklaracje zmiennych (`let`) oraz przypisania,
+* instrukcje sterujące: `if/else`, `while`, `for ... to ... step`, `repeat`, `break`, `continue`,
+* deklaracje i wywołania procedur (`proc`, `return`),
+* instrukcje rysujące (`canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`),
+* wyrażenia z priorytetami operatorów (logiczne, porównania, arytmetyczne, jednoargumentowe, atomy),
+* bloki `{ ... }` zawierające dowolny ciąg instrukcji.
 
 ---
 
-## 🧪 Examples
+## Etapy przetwarzania
 
-### Example 1
+1. Analiza leksykalna (tokenizacja).
+2. Analiza składniowa (parser Lark).
+3. Budowa wewnętrznej reprezentacji (model sceny).
+4. Interpretacja instrukcji.
+5. Generowanie wyjściowego pliku SVG.
 
-Input:
+---
+
+## Przykłady
+
+### Przykład 1
+
+Wejście:
 
 ```
 canvas 200 200
 circle 100 100 50
 ```
 
-Output:
+Wynik:
 
-* A circle centered in the canvas
+* okrąg umieszczony na środku płótna.
 
 ---
 
-### Example 2
+### Przykład 2
 
-Input:
+Wejście:
 
 ```
 canvas 300 300
@@ -265,79 +224,106 @@ rect 50 50 200 100
 line 0 0 300 300
 ```
 
----
-
-## 📚 Functional Requirements
-
-* parsing DrawLang programs
-* supporting basic shapes
-* generating valid SVG output
-* handling colors
+Dodatkowe, bardziej rozbudowane przykłady znajdują się w katalogu [`examples/`](examples).
 
 ---
 
-## ⚙️ Non-Functional Requirements
+## Wymagania funkcjonalne
 
-* clean and readable code
-* modular architecture
-* easy extensibility
-* complete documentation in repository
-
----
-
-## 🚀 Possible Extensions
-
-* PNG export (e.g., using Pillow)
-* grouping elements
-* variables support
-* SVG animations
+* parsowanie programów napisanych w DrawLang,
+* obsługa podstawowych kształtów,
+* generowanie poprawnego pliku SVG,
+* obsługa kolorów.
 
 ---
 
-## 📁 Project Structure
+## Wymagania niefunkcjonalne
+
+* czytelny i uporządkowany kod,
+* modularna architektura,
+* łatwa rozszerzalność,
+* kompletna dokumentacja w repozytorium.
+
+---
+
+## Możliwe rozszerzenia
+
+* eksport do PNG (np. z użyciem Pillow),
+* grupowanie elementów,
+* animacje SVG,
+* dodatkowe prymitywy (elipsa, wielokąt, krzywe Béziera).
+
+---
+
+## Struktura projektu
 
 ```
-/grammar
-/src
-    parser.py
-    interpreter.py
-    svg_generator.py
-/examples
-README.md
+DrawLang/
+├── examples/
+│   ├── advanced.draw
+│   └── test.draw
+├── .gitignore
+├── grammar.lark
+├── main.py
+├── README.md
+└── requirements.txt
 ```
 
----
-
-## 💼 Project Value
-
-This project demonstrates:
-
-* creation of a custom DSL
-* use of a parser generator
-* transformation from text → graphics
+* `grammar.lark` – definicja gramatyki języka DrawLang dla parsera Lark.
+* `main.py` – punkt wejścia: wczytuje plik `.draw`, buduje drzewo składniowe i generuje SVG (lub wypisuje AST).
+* `examples/` – przykładowe programy w DrawLang (`test.draw`, `advanced.draw`).
+* `requirements.txt` – lista zależności Pythona.
 
 ---
 
-## Installation
+## Wartość projektu
 
-1. Clone the repository:
+Projekt pokazuje:
+
+* tworzenie własnego języka dziedzinowego (DSL),
+* praktyczne wykorzystanie generatora parserów,
+* transformację: tekst → grafika.
+
+---
+
+## Instalacja
+
+1. Sklonowanie repozytorium:
+
    ```bash
-   git clone <your-repo-url>
+   git clone <adres-repozytorium>
    cd DrawLang
-   
-2. Create and activate virtual environment:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-3. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-## ▶️ Usage (planned)
+   ```
 
+2. Utworzenie i aktywacja środowiska wirtualnego:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate   # Windows: venv\Scripts\activate
+   ```
+
+3. Instalacja zależności:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
+## Uruchomienie
+
+Generowanie pliku SVG na podstawie programu w DrawLang:
+
+```bash
+python main.py examples/test.draw
 ```
-python main.py input.draw
+
+Wynik zostanie zapisany obok pliku wejściowego (np. `examples/test.svg`).
+
+Podgląd drzewa składniowego (AST) zamiast generowania SVG:
+
+```bash
+python main.py examples/test.draw --ast
 ```
 
 ---
