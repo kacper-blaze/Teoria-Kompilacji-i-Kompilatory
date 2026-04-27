@@ -31,9 +31,11 @@ Lark został wybrany, ponieważ:
 * nie wymaga zewnętrznej generacji kodu,
 * integruje się bezpośrednio z Pythonem.
 
+### Interpreter własnego języka
+
 ---
 
-# Interpreter własnego języka
+
 
 ## Cel projektu
 
