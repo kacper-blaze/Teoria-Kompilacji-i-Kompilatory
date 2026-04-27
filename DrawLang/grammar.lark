@@ -75,30 +75,40 @@ translate_stmt: "translate" expr expr
 scale_stmt:     "scale"     expr
 
 // ---------------------------------------------------------------------
-// Expressions (precedence: or < and < not < cmp < +- < */ < unary < atom)
+// Expressions (logic and arithmetic)
 // ---------------------------------------------------------------------
 
-?expr:       or_expr
+?expr:       logical_expr | arithmetic_expr
 
-?or_expr:    and_expr ("or" and_expr)*
-?and_expr:   not_expr ("and" not_expr)*
-?not_expr:   "not" not_expr        -> not_op
-           | comparison
-?comparison: sum (cmp_op sum)?
-!cmp_op:     "==" | "!=" | "<=" | ">=" | "<" | ">"
+// --- Logic exressions ------------------------------------------------
+?logical_expr: or_expr
+?or_expr:     and_expr ("or" and_expr)*
+?and_expr:    not_expr ("and" not_expr)*
+?not_expr:    "not" not_expr -> not_op
+             | logical_comparison
+?logical_comparison: arithmetic_expr (cmp_op arithmetic_expr)?
+!cmp_op:      "==" | "!=" | "<=" | ">=" | "<" | ">"
 
-?sum:        product (add_op product)*
-!add_op:     "+" | "-"
-?product:    unary (mul_op unary)*
-!mul_op:     "*" | "/" | "%"
-?unary:      "-" unary              -> neg
-           | atom
+// --- Arithmetic expressions ---------------------------------------------
+?arithmetic_expr: sum
+?sum:         product (add_op product)*
+!add_op:      "+" | "-"
+?product:     unary (mul_op unary)*
+!mul_op:      "*" | "/" | "%"
+?unary:       "-" unary -> neg
+             | arithmetic_atom
 
-?atom: NUMBER                       -> number
-     | STRING                       -> string
+?arithmetic_atom: NUMBER -> number
+                 | IDENTIFIER -> var
+                 | call
+                 | "(" arithmetic_expr ")"
+
+// --- common atoms ------------------------------------------------------
+?atom: NUMBER -> number
+     | STRING -> string
      | bool_lit
      | call
-     | IDENTIFIER                   -> var
+     | IDENTIFIER -> var
      | "(" expr ")"
 
 bool_lit: "true" | "false"

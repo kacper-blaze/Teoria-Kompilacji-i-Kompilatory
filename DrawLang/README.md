@@ -33,6 +33,8 @@ Lark został wybrany, ponieważ:
 
 ---
 
+# Interpreter własnego języka
+
 ## Cel projektu
 
 DrawLang to autorski język dziedzinowy (DSL) służący do opisywania grafiki wektorowej za pomocą prostych komend tekstowych.
@@ -118,12 +120,20 @@ star(100, 100, 40)
 
 ### Wyrażenia
 
-* arytmetyczne: `+ - * / %`
-* porównania:  `== != < > <= >=`
-* logiczne:    `and`, `or`, `not`
-* literały:    liczby, łańcuchy (`"hello"`), `true`, `false`
-* grupowanie:  `( ... )`
-* wywołania funkcji wewnątrz wyrażeń
+#### Wyrażenia arytmetyczne
+* operatory: `+ - * / %`
+* literały: liczby, zmienne, wywołania funkcji
+* grupowanie: `( ... )`
+
+#### Wyrażenia logiczne  
+* operatory: `and`, `or`, `not`
+* porównania: `== != < > <= >=` (porównują wyrażenia arytmetyczne)
+* literały: `true`, `false`
+
+#### Wspólne elementy
+* zmienne i identyfikatory
+* wywołania funkcji
+* łańcuchy znaków (`"hello"`)
 
 ### Komentarze
 
@@ -174,14 +184,15 @@ star(100, 100, 40)
 
 ## Gramatyka
 
-Pełna definicja gramatyki znajduje się w pliku [`grammar.lark`](grammar.lark).
+Pełna definicja gramatyki znajduje się w pliku [[grammar.lark](cci:7://file:///home/blaze/PycharmProjects/Teoria-Kompilacji-i-Kompilatory/DrawLang/grammar.lark:0:0-0:0)](grammar.lark).
 W skrócie obejmuje ona:
 
 * deklaracje zmiennych (`let`) oraz przypisania,
 * instrukcje sterujące: `if/else`, `while`, `for ... to ... step`, `repeat`, `break`, `continue`,
 * deklaracje i wywołania procedur (`proc`, `return`),
 * instrukcje rysujące (`canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`),
-* wyrażenia z priorytetami operatorów (logiczne, porównania, arytmetyczne, jednoargumentowe, atomy),
+* wyrażenia z podziałem na arytmetyczne (`+ - * / %`) i logiczne (`and or not`, porównania),
+* priorytety operatorów i grupowanie,
 * bloki `{ ... }` zawierające dowolny ciąg instrukcji.
 
 ---
