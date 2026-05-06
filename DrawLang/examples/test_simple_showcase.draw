@@ -1,0 +1,28 @@
+canvas 600 600
+
+// Simple background
+color #1A1A2E
+rect 0 0 600 600
+
+// Simple grid
+color #4FC3F7
+rect 20 20 60 60
+rect 90 20 60 60
+rect 20 90 60 60
+rect 90 90 60 60
+
+// Simple bullseye
+color #FF0000
+circle 450 150 80
+color #FFFFFF
+circle 450 150 60
+color #FF0000
+circle 450 150 40
+color #FFFFFF
+circle 450 150 20
+
+// Simple triangle
+color #00FF00
+line 150 340 60 475
+line 60 475 240 475
+line 240 475 150 340

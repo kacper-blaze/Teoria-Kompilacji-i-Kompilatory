@@ -61,7 +61,7 @@ circle 50 50 20
 
 ---
 
-## Format wyjściowy
+## Format wyjściowy (plik .svg)
 
 Wynikiem działania programu jest plik SVG, na przykład:
 
@@ -125,10 +125,16 @@ star(100, 100, 40)
 * literały: liczby, zmienne, wywołania funkcji
 * grupowanie: `( ... )`
 
+#### Funkcje matematyczne
+* `sin(angle)`, `cos(angle)` - funkcje trygonometryczne (kąt w stopniach)
+* `sqrt(x)` - pierwiastek kwadratowy
+* `abs(x)` - wartość bezwzględna
+* `round(x)` - zaokrąglenie
+* `min(a, b)`, `max(a, b)` - minimum i maksimum
+
 #### Wyrażenia logiczne  
-* operatory: `and`, `or`, `not`
+* operatory: `and`, `or` (uwaga: operator `not` ma ograniczenia)
 * porównania: `== != < > <= >=` (porównują wyrażenia arytmetyczne)
-* literały: `true`, `false`
 
 #### Wspólne elementy
 * zmienne i identyfikatory
@@ -184,7 +190,7 @@ star(100, 100, 40)
 
 ## Gramatyka
 
-Pełna definicja gramatyki znajduje się w pliku [[grammar.lark](cci:7://file:///home/blaze/PycharmProjects/Teoria-Kompilacji-i-Kompilatory/DrawLang/grammar.lark:0:0-0:0)](grammar.lark).
+Pełna definicja gramatyki znajduje się w pliku [[grammar.lark]](grammar.lark).
 W skrócie obejmuje ona:
 
 * deklaracje zmiennych (`let`) oraz przypisania,
@@ -235,7 +241,11 @@ rect 50 50 200 100
 line 0 0 300 300
 ```
 
-Dodatkowe, bardziej rozbudowane przykłady znajdują się w katalogu [`examples/`](examples).
+Dodatkowe, bardziej rozbudowane przykłady znajdują się w katalogu [`examples/`](examples):
+
+* `showcase.draw` - kompletny rysunek demonstrujący wszystkie funkcje języka
+* `complex.draw` - zestaw testów weryfikujących każdą funkcjonalność
+* `advanced.draw` - zaawansowane techniki i wzory
 
 ---
 
@@ -271,18 +281,24 @@ Dodatkowe, bardziej rozbudowane przykłady znajdują się w katalogu [`examples/
 ```
 DrawLang/
 ├── examples/
-│   ├── advanced.draw
-│   └── test.draw
+│   ├── showcase.draw
+│   ├── complex.draw
+│   └── advanced.draw
 ├── .gitignore
 ├── grammar.lark
+├── interpreter.py
 ├── main.py
 ├── README.md
 └── requirements.txt
 ```
 
 * `grammar.lark` – definicja gramatyki języka DrawLang dla parsera Lark.
+* `interpreter.py` – interpreter języka DrawLang z obsługą wszystkich funkcji.
 * `main.py` – punkt wejścia: wczytuje plik `.draw`, buduje drzewo składniowe i generuje SVG (lub wypisuje AST).
-* `examples/` – przykładowe programy w DrawLang (`test.draw`, `advanced.draw`).
+* `examples/` – przykładowe programy w DrawLang:
+  * `showcase.draw` - kompletny przykład pokazujący wszystkie funkcje
+  * `complex.draw` - testy jednostkowe wszystkich funkcjonalności
+  * `advanced.draw` - zaawansowane przykłady użycia
 * `requirements.txt` – lista zależności Pythona.
 
 ---
@@ -319,6 +335,8 @@ Projekt pokazuje:
    pip install -r requirements.txt
    ```
 
+**Uwaga:** W systemach Linux z zarządzanymi środowiskami Python (np. Pop!_OS, Ubuntu) może być konieczne użycie środowiska wirtualnego, aby uniknąć błędu `externally-managed-environment`.
+
 ---
 
 ## Uruchomienie
@@ -326,15 +344,28 @@ Projekt pokazuje:
 Generowanie pliku SVG na podstawie programu w DrawLang:
 
 ```bash
-python main.py examples/test.draw
+python main.py examples/showcase.draw
 ```
 
-Wynik zostanie zapisany obok pliku wejściowego (np. `examples/test.svg`).
+Wynik zostanie zapisany obok pliku wejściowego (np. `examples/showcase.svg`).
 
 Podgląd drzewa składniowego (AST) zamiast generowania SVG:
 
 ```bash
-python main.py examples/test.draw --ast
+python main.py examples/showcase.draw --ast
+```
+
+### Przykłady użycia
+
+```bash
+# Kompletny przykład pokazujący wszystkie funkcje
+python main.py examples/showcase.draw
+
+# Testy jednostkowe wszystkich funkcjonalności
+python main.py examples/complex.draw
+
+# Zaawansowane przykłady
+python main.py examples/advanced.draw
 ```
 
 ---

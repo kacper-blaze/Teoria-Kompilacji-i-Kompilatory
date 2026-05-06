@@ -47,8 +47,7 @@ params:      IDENTIFIER ("," IDENTIFIER)*
 
 return_stmt: "return" [expr]
 
-call_stmt:   call
-call:        IDENTIFIER "(" args? ")"
+call_stmt:   IDENTIFIER "(" args? ")"
 args:        expr ("," expr)*
 
 // ---------------------------------------------------------------------
@@ -99,15 +98,15 @@ scale_stmt:     "scale"     expr
              | arithmetic_atom
 
 ?arithmetic_atom: NUMBER -> number
+                 | IDENTIFIER "(" args? ")" -> call
                  | IDENTIFIER -> var
-                 | call
                  | "(" arithmetic_expr ")"
 
 // --- common atoms ------------------------------------------------------
 ?atom: NUMBER -> number
      | STRING -> string
      | bool_lit
-     | call
+     | IDENTIFIER "(" args? ")" -> call
      | IDENTIFIER -> var
      | "(" expr ")"
 
