@@ -1,0 +1,163 @@
+// =====================================================================
+// DrawLang showcase: spirala, siatka, fraktal-like wzór
+// =====================================================================
+canvas 600 600
+
+// -----------------------------------------------------------------------
+// Procedura: siatka prostokątów z gradientem rozmiaru
+// -----------------------------------------------------------------------
+proc grid(cols, rows, cell_w, cell_h, margin) {
+    let row = 0
+    while row < rows {
+        let col = 0
+        while col < cols {
+            let x = margin + col * cell_w
+            let y = margin + row * cell_h
+            let shrink = (col + row) * 2
+            rect (x + shrink / 2) (y + shrink / 2) (cell_w - shrink) (cell_h - shrink)
+            col = col + 1
+        }
+        row = row + 1
+    }
+}
+
+// -----------------------------------------------------------------------
+// Procedura: koncentryczne okręgi (cel strzelecki)
+// -----------------------------------------------------------------------
+proc bullseye(cx, cy, max_r, step_r) {
+    let r = max_r
+    let toggle = 0
+    while r > 0 {
+        if toggle == 0 {
+            color #CC3333
+        } else {
+            color #EEEEEE
+        }
+        circle cx cy r
+        r = r - step_r
+        if toggle == 0 {
+            toggle = 1
+        } else {
+            toggle = 0
+        }
+    }
+}
+
+// -----------------------------------------------------------------------
+// Procedura: promienie (gwiazda z linii)
+// -----------------------------------------------------------------------
+proc sunburst(cx, cy, inner_r, outer_r, rays) {
+    let i = 0
+    let angle_step = 360 / rays
+    while i < rays {
+        let angle = i * angle_step
+        // przybliżenie sin/cos przez prekalkulowane wartości dla 12 promieni
+        // używamy wbudowanych funkcji sin/cos (kąty w stopniach)
+        let x1 = cx + sin(angle) * inner_r
+        let y1 = cy - cos(angle) * inner_r
+        let x2 = cx + sin(angle) * outer_r
+        let y2 = cy - cos(angle) * outer_r
+        line x1 y1 x2 y2
+        i = i + 1
+    }
+}
+
+// -----------------------------------------------------------------------
+// Procedura: drabinka poziomych kresek
+// -----------------------------------------------------------------------
+proc ladder(x, y, w, h, rungs) {
+    // boczne słupki
+    line x y (x + w) y
+    line (x) (y + h) (x + w) (y + h)
+    // poprzeczki
+    let spacing = h / (rungs + 1)
+    let i = 1
+    while i <= rungs {
+        let ry = y + i * spacing
+        line x ry (x + w) ry
+        i = i + 1
+    }
+}
+
+// -----------------------------------------------------------------------
+// Procedura: trójkąt z trzech linii
+// -----------------------------------------------------------------------
+proc triangle(x1, y1, x2, y2, x3, y3) {
+    line x1 y1 x2 y2
+    line x2 y2 x3 y3
+    line x3 y3 x1 y1
+}
+
+// -----------------------------------------------------------------------
+// Procedura: zagnieżdżone trójkąty (fraktal-like, ograniczona głębokość)
+// -----------------------------------------------------------------------
+proc nested_triangles(cx, cy, size, depth) {
+    if depth <= 0 { return }
+    let half = size / 2
+    let x1 = cx
+    let y1 = cy - size
+    let x2 = cx - size
+    let y2 = cy + half
+    let x3 = cx + size
+    let y3 = cy + half
+    triangle(x1, y1, x2, y2, x3, y3)
+    nested_triangles(cx, cy, size - 20, depth - 1)
+}
+
+// -----------------------------------------------------------------------
+// Procedura: rząd kółek różnej wielkości
+// -----------------------------------------------------------------------
+proc circle_row(y, count, spacing, base_r) {
+    let i = 0
+    while i < count {
+        let x = spacing + i * spacing
+        let r = base_r + i * 3
+        circle x y r
+        i = i + 1
+    }
+}
+
+// =====================================================================
+// GŁÓWNY RYSUNEK
+// =====================================================================
+
+// --- tło (duży prostokąt) ---
+color #1A1A2E
+rect 0 0 600 600
+
+// --- lewy górny kwadrant: siatka ---
+color #4FC3F7
+grid(4, 4, 60, 60, 20)
+
+// --- prawy górny kwadrant: cel strzelecki ---
+bullseye(450, 150, 100, 15)
+
+// --- środek: promienisty wzór (sunburst) ---
+color #FFD700
+sunburst(300, 300, 30, 120, 24)
+
+// --- środek: wewnętrzny okrąg ---
+color #FFFFFF
+circle 300 300 28
+
+// --- lewy dolny kwadrant: zagnieżdżone trójkąty ---
+color #76FF03
+nested_triangles(150, 430, 90, 4)
+
+// --- prawy dolny kwadrant: drabinka ---
+color #FF6E40
+ladder(360, 370, 160, 180, 7)
+
+// --- dół: rząd kółek ---
+color #CE93D8
+circle_row(570, 8, 65, 8)
+
+// --- przekątna akcentująca ---
+color #FF4081
+let d = 0
+repeat 10 {
+    let offset = d * 30
+    line offset 0 600 (600 - offset)
+    d = d + 1
+}
+
