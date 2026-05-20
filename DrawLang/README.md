@@ -1,4 +1,4 @@
-# DrawLang – język dziedzinowy do grafiki wektorowej
+# DrawLang
 
 ## Autorzy
 
@@ -7,29 +7,41 @@
 
 ---
 
-## Język implementacji
+# Opis projektu
 
-* Python 3.11+
+## Temat projektu
+
+DrawLang to autorski język dziedzinowy (DSL – Domain Specific Language) służący do generowania grafiki wektorowej SVG za pomocą prostych instrukcji tekstowych.
+
+Projekt implementuje interpreter własnego języka programowania wraz z parserem i systemem wykonywania instrukcji.
 
 ---
 
-## Generator parsera
+# Założenia programu
 
-Projekt korzysta z biblioteki:
+## Cel projektu
 
-* **Lark (Python parsing library)**
+Celem projektu jest:
 
-Rozważane alternatywy:
+- zaprojektowanie własnego języka dziedzinowego,
+- implementacja parsera i interpretera,
+- obsługa instrukcji sterujących i procedur,
+- generowanie grafiki SVG,
+- praktyczne wykorzystanie narzędzi do analizy składniowej.
 
-* ANTLR4
-* PLY (Python Lex-Yacc)
-* Bison / YACC
+---
 
-Lark został wybrany, ponieważ:
+## Rodzaj translatora
 
-* jest prosty w użyciu i przyjazny dla początkujących,
-* nie wymaga zewnętrznej generacji kodu,
-* integruje się bezpośrednio z Pythonem.
+Projekt jest:
+
+- interpreterem języka DrawLang.
+
+Program:
+- analizuje kod źródłowy,
+- buduje drzewo składniowe AST,
+- interpretuje instrukcje programu,
+- generuje wynikowy plik SVG.
 
 ### Interpreter własnego języka
 
@@ -37,78 +49,292 @@ Lark został wybrany, ponieważ:
 
 
 
-## Cel projektu
+Interpreter przyjmuje program zapisany w języku DrawLang i generuje:
 
-DrawLang to autorski język dziedzinowy (DSL) służący do opisywania grafiki wektorowej za pomocą prostych komend tekstowych.
+- grafikę wektorową SVG.
 
-Program parsuje kod w DrawLang i generuje:
-
-* obrazy w formacie SVG.
-
----
-
-## Format wejściowy
-
-Przykładowy program:
-
-```
-canvas 200 200
-
-circle 100 100 50
-line 0 0 200 200
-
-color red
-circle 50 50 20
-```
+Przykładowe zastosowania:
+- rysowanie figur geometrycznych,
+- generowanie wzorów,
+- eksperymenty z własnym językiem programowania,
+- wizualizacja algorytmów geometrycznych.
 
 ---
 
-## Format wyjściowy (plik .svg)
+## Język implementacji
 
-Wynikiem działania programu jest plik SVG, na przykład:
+Projekt został zaimplementowany w:
 
-```xml
-<svg width="200" height="200">
-  <circle cx="100" cy="100" r="50" />
-  <line x1="0" y1="0" x2="200" y2="200" />
-</svg>
+- Python 3.11+
+
+---
+
+## Sposób realizacji parsera
+
+Projekt wykorzystuje bibliotekę:
+
+- Lark (Python parsing library)
+
+Parser został zaimplementowany z użyciem formalnej gramatyki zapisanej w pliku `grammar.lark`.
+
+Lark został wybrany ze względu na:
+
+- prostą integrację z Pythonem,
+- obsługę gramatyk EBNF,
+- możliwość użycia parsera Earley,
+- brak konieczności generowania dodatkowego kodu parsera.
+
+Rozważane alternatywy:
+
+- ANTLR4,
+- PLY (Python Lex-Yacc),
+- Bison / YACC.
+
+---
+
+# Architektura programu
+
+Proces przetwarzania programu DrawLang przebiega w kilku etapach:
+
+1. Analiza leksykalna (tokenizacja),
+2. Analiza składniowa (parser),
+3. Budowa drzewa składniowego AST,
+4. Interpretacja instrukcji programu,
+5. Generowanie pliku SVG.
+
+Schemat działania:
+
+```text
+Kod DrawLang
+      ↓
+Lexer / Parser (Lark)
+      ↓
+AST (Abstract Syntax Tree)
+      ↓
+Interpreter
+      ↓
+SVG
 ```
 
 ---
 
-## Funkcjonalności
+# Tokeny
 
-### Podstawowe kształty
+## Słowa kluczowe
 
-* `circle x y r`
-* `line x1 y1 x2 y2`
-* `rect x y width height`
+| Kategoria             | Leksemy |
+|----------------------|----------|
+| grafika              | `canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale` |
+| sterowanie przepływem| `if`, `else`, `while`, `for`, `to`, `step`, `repeat`, `break`, `continue` |
+| deklaracje           | `let`, `proc`, `return` |
+| logiczne             | `and`, `or`, `not`, `true`, `false` |
 
-### Ustawienia sceny
+---
 
-* `canvas width height`
-* `color name`
-* `color #RRGGBB`
-* `translate x y`
-* `scale s`
+## Literały i identyfikatory
 
-### Zmienne
+| Token | Wzorzec | Przykład |
+|------|------|------|
+| `NUMBER` | `[0-9]+(\.[0-9]+)?` | `10`, `3.14` |
+| `IDENTIFIER` | `[a-zA-Z_][a-zA-Z0-9_]*` | `x`, `radius` |
+| `STRING` | `"..."` | `"hello"` |
+| `HEX_COLOR` | `#[0-9a-fA-F]{6}` | `#FF00AA` |
 
-* `let x = 10`
-* `x = x + 1`
+---
 
-### Sterowanie przepływem
+## Operatory
 
-* `if cond { ... } else if cond { ... } else { ... }`
-* `while cond { ... }`
-* `for i = 0 to 10 { ... }` (opcjonalnie `step expr`)
-* `repeat n { ... }`
-* `break`    – wyjście z najbliższej pętli
-* `continue` – przejście do kolejnej iteracji
+| Typ | Operatory |
+|------|------|
+| arytmetyczne | `+ - * / %` |
+| porównania | `== != < > <= >=` |
+| logiczne | `and or not` |
+| przypisanie | `=` |
 
-### Procedury
+---
 
+## Separatory i grupowanie
+
+| Symbol |
+|------|
+| `(` `)` |
+| `{` `}` |
+| `,` |
+
+---
+
+## Komentarze
+
+Obsługiwane są:
+
+```drawlang
+// komentarz liniowy
 ```
+
+oraz:
+
+```drawlang
+/* komentarz blokowy */
+```
+
+---
+
+# Gramatyka języka
+
+Pełna definicja gramatyki znajduje się w pliku:
+
+```text
+grammar.lark
+```
+
+Projekt wykorzystuje notację parsera Lark (EBNF-like).
+
+---
+
+## Fragment gramatyki
+
+```ebnf
+program: statement*
+
+?statement: var_decl
+          | assign_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | repeat_stmt
+          | proc_decl
+          | return_stmt
+          | shape_stmt
+          | call_stmt
+```
+
+---
+
+## Wyrażenia arytmetyczne
+
+```ebnf
+?sum: product (add_op product)*
+?product: unary (mul_op unary)*
+```
+
+Obsługiwane operatory:
+
+- `+`
+- `-`
+- `*`
+- `/`
+- `%`
+
+---
+
+## Wyrażenia logiczne
+
+```ebnf
+?logical_expr: or_expr
+?or_expr: and_expr (_OR and_expr)*
+?and_expr: not_expr (_AND not_expr)*
+```
+
+Obsługiwane są:
+
+- `and`
+- `or`
+- `not`
+- operatory porównań
+
+---
+
+# Funkcjonalności języka
+
+## Instrukcje rysujące
+
+### Canvas
+
+```drawlang
+canvas width height
+```
+
+### Okręgi
+
+```drawlang
+circle x y r
+```
+
+### Linie
+
+```drawlang
+line x1 y1 x2 y2
+```
+
+### Prostokąty
+
+```drawlang
+rect x y width height
+```
+
+---
+
+## Kolory i transformacje
+
+```drawlang
+color "#FF0000"
+translate 50 50
+scale 2
+```
+
+---
+
+## Zmienne
+
+```drawlang
+let x = 10
+x = x + 1
+```
+
+---
+
+## Instrukcje sterujące
+
+### If / else
+
+```drawlang
+if x > 10 {
+    circle 100 100 50
+}
+else {
+    rect 50 50 100 100
+}
+```
+
+### While
+
+```drawlang
+while x < 100 {
+    x = x + 10
+}
+```
+
+### For
+
+```drawlang
+for i = 0 to 10 step 2 {
+    circle i 100 10
+}
+```
+
+### Repeat
+
+```drawlang
+repeat 5 {
+    circle 50 50 10
+}
+```
+
+---
+
+## Procedury
+
+```drawlang
 proc star(cx, cy, r) {
     circle cx cy r
 }
@@ -116,258 +342,233 @@ proc star(cx, cy, r) {
 star(100, 100, 40)
 ```
 
-* deklaracja: `proc NAZWA(p1, p2, ...) { ... }`
-* wywołanie: `NAZWA(a1, a2, ...)`
-* obsługiwana jest instrukcja `return expr` (wartość opcjonalna)
+Obsługiwane są:
 
-### Wyrażenia
-
-#### Wyrażenia arytmetyczne
-* operatory: `+ - * / %`
-* literały: liczby, zmienne, wywołania funkcji
-* grupowanie: `( ... )`
-
-#### Funkcje matematyczne
-* `sin(angle)`, `cos(angle)` - funkcje trygonometryczne (kąt w stopniach)
-* `sqrt(x)` - pierwiastek kwadratowy
-* `abs(x)` - wartość bezwzględna
-* `round(x)` - zaokrąglenie
-* `min(a, b)`, `max(a, b)` - minimum i maksimum
-
-#### Wyrażenia logiczne  
-* operatory: `and`, `or` (uwaga: operator `not` ma ograniczenia)
-* porównania: `== != < > <= >=` (porównują wyrażenia arytmetyczne)
-
-#### Wspólne elementy
-* zmienne i identyfikatory
-* wywołania funkcji
-* łańcuchy znaków (`"hello"`)
-
-### Komentarze
-
-* `// komentarz liniowy`
-* `/* komentarz blokowy */`
+- argumenty,
+- lokalne zmienne,
+- instrukcja `return`.
 
 ---
 
-## Tokeny
+## Funkcje matematyczne
 
-### Słowa kluczowe (zarezerwowane)
+Dostępne funkcje:
 
-| Kategoria             | Leksemy                                                                             |
-|-----------------------|-------------------------------------------------------------------------------------|
-| kształty / scena      | `canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`                   |
-| sterowanie przepływem | `if`, `else`, `while`, `for`, `to`, `step`, `repeat`, `return`, `break`, `continue` |
-| deklaracje            | `let`, `proc`                                                                       |
-| logiczne / literały   | `and`, `or`, `not`, `true`, `false`                                                 |
-
-### Literały i identyfikatory
-
-| Token        | Wzorzec (regex)                          | Przykład         |
-|--------------|------------------------------------------|------------------|
-| `NUMBER`     | `[0-9]+ ( "." [0-9]+ )?`                 | `42`, `3.14`     |
-| `IDENTIFIER` | `[a-zA-Z_][a-zA-Z0-9_]*`                 | `red`, `cx`      |
-| `STRING`     | `"([^"\\]\|\\.)*"` (z sekwencjami `\`)   | `"hello"`        |
-| `HEX_COLOR`  | `#[0-9a-fA-F]{6}`                        | `#FF00AA`        |
-
-### Operatory i znaki interpunkcyjne
-
-| Kategoria   | Leksemy                               |
-|-------------|---------------------------------------|
-| arytmetyczne| `+`  `-`  `*`  `/`  `%`               |
-| porównania  | `==` `!=` `<` `>` `<=` `>=`           |
-| przypisanie | `=`                                   |
-| grupowanie  | `(`  `)`  `{`  `}`                    |
-| separator   | `,`                                   |
-
-### Pomijane
-
-| Token         | Wzorzec             | Akcja    |
-|---------------|---------------------|----------|
-| `WS`          | `[ \t\r\n]+`        | pomijany |
-| `CPP_COMMENT` | `//[^\n]*`          | pomijany |
-| `C_COMMENT`   | `/* ... */`         | pomijany |
+- `sin(x)`
+- `cos(x)`
+- `tan(x)`
+- `sqrt(x)`
+- `abs(x)`
+- `round(x)`
+- `floor(x)`
+- `ceil(x)`
+- `min(a, b)`
+- `max(a, b)`
 
 ---
 
-## Gramatyka
+# Interpreter
 
-Pełna definicja gramatyki znajduje się w pliku [[grammar.lark]](grammar.lark).
-W skrócie obejmuje ona:
+Interpreter wykonuje program bezpośrednio na podstawie drzewa AST.
 
-* deklaracje zmiennych (`let`) oraz przypisania,
-* instrukcje sterujące: `if/else`, `while`, `for ... to ... step`, `repeat`, `break`, `continue`,
-* deklaracje i wywołania procedur (`proc`, `return`),
-* instrukcje rysujące (`canvas`, `circle`, `line`, `rect`, `color`, `translate`, `scale`),
-* wyrażenia z podziałem na arytmetyczne (`+ - * / %`) i logiczne (`and or not`, porównania),
-* priorytety operatorów i grupowanie,
-* bloki `{ ... }` zawierające dowolny ciąg instrukcji.
+Obsługiwane mechanizmy:
 
----
-
-## Etapy przetwarzania
-
-1. Analiza leksykalna (tokenizacja).
-2. Analiza składniowa (parser Lark).
-3. Budowa wewnętrznej reprezentacji (model sceny).
-4. Interpretacja instrukcji.
-5. Generowanie wyjściowego pliku SVG.
+- zmienne,
+- lokalne zakresy (scope),
+- procedury,
+- instrukcje sterujące,
+- wyrażenia logiczne,
+- transformacje geometryczne,
+- generowanie SVG.
 
 ---
 
-## Przykłady
+# AST – Abstract Syntax Tree
 
-### Przykład 1
+Parser buduje abstrakcyjne drzewo składniowe AST.
 
-Wejście:
+Przykład:
 
-```
-canvas 200 200
-circle 100 100 50
+Kod:
+
+```drawlang
+let x = 5 + 2
 ```
 
-Wynik:
+AST:
 
-* okrąg umieszczony na środku płótna.
-
----
-
-### Przykład 2
-
-Wejście:
-
-```
-canvas 300 300
-color blue
-rect 50 50 200 100
-line 0 0 300 300
+```text
+var_decl
+ ├── x
+ └── sum
+      ├── 5
+      ├── +
+      └── 2
 ```
 
-Dodatkowe, bardziej rozbudowane przykłady znajdują się w katalogu [`examples/`](examples):
+---
 
-* `showcase.draw` - kompletny rysunek demonstrujący wszystkie funkcje języka
-* `complex.draw` - zestaw testów weryfikujących każdą funkcjonalność
-* `advanced.draw` - zaawansowane techniki i wzory
+# Obsługa błędów
+
+Interpreter obsługuje:
+
+- błędy składniowe,
+- nieznane zmienne,
+- nieznane procedury,
+- błędną liczbę argumentów,
+- błędy wykonania,
+- walidację parametrów figur geometrycznych.
 
 ---
 
-## Wymagania funkcjonalne
+# Pakiety zewnętrzne
 
-* parsowanie programów napisanych w DrawLang,
-* obsługa podstawowych kształtów,
-* generowanie poprawnego pliku SVG,
-* obsługa kolorów.
+Projekt wykorzystuje:
 
----
-
-## Wymagania niefunkcjonalne
-
-* czytelny i uporządkowany kod,
-* modularna architektura,
-* łatwa rozszerzalność,
-* kompletna dokumentacja w repozytorium.
+| Pakiet | Zastosowanie |
+|------|------|
+| `lark` | parser i analiza składniowa |
+| `math` | funkcje matematyczne |
 
 ---
 
-## Możliwe rozszerzenia
+# Instalacja
 
-* eksport do PNG (np. z użyciem Pillow),
-* grupowanie elementów,
-* animacje SVG,
-* dodatkowe prymitywy (elipsa, wielokąt, krzywe Béziera).
+## 1. Sklonowanie repozytorium
 
----
-
-## Struktura projektu
-
-```
-DrawLang/
-├── examples/
-│   ├── showcase.draw
-│   ├── complex.draw
-│   └── advanced.draw
-├── .gitignore
-├── grammar.lark
-├── interpreter.py
-├── main.py
-├── README.md
-└── requirements.txt
+```bash
+git clone <repo-url>
+cd DrawLang
 ```
 
-* `grammar.lark` – definicja gramatyki języka DrawLang dla parsera Lark.
-* `interpreter.py` – interpreter języka DrawLang z obsługą wszystkich funkcji.
-* `main.py` – punkt wejścia: wczytuje plik `.draw`, buduje drzewo składniowe i generuje SVG (lub wypisuje AST).
-* `examples/` – przykładowe programy w DrawLang:
-  * `showcase.draw` - kompletny przykład pokazujący wszystkie funkcje
-  * `complex.draw` - testy jednostkowe wszystkich funkcjonalności
-  * `advanced.draw` - zaawansowane przykłady użycia
-* `requirements.txt` – lista zależności Pythona.
+---
+
+## 2. Utworzenie środowiska wirtualnego
+
+Linux/macOS:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
 
 ---
 
-## Wartość projektu
+## 3. Instalacja zależności
 
-Projekt pokazuje:
-
-* tworzenie własnego języka dziedzinowego (DSL),
-* praktyczne wykorzystanie generatora parserów,
-* transformację: tekst → grafika.
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## Instalacja
+# Instrukcja obsługi
 
-1. Sklonowanie repozytorium:
-
-   ```bash
-   git clone <adres-repozytorium>
-   cd DrawLang
-   ```
-
-2. Utworzenie i aktywacja środowiska wirtualnego:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate   # Windows: venv\Scripts\activate
-   ```
-
-3. Instalacja zależności:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-**Uwaga:** W systemach Linux z zarządzanymi środowiskami Python (np. Pop!_OS, Ubuntu) może być konieczne użycie środowiska wirtualnego, aby uniknąć błędu `externally-managed-environment`.
-
----
-
-## Uruchomienie
-
-Generowanie pliku SVG na podstawie programu w DrawLang:
+Generowanie SVG:
 
 ```bash
 python main.py examples/showcase.draw
 ```
 
-Wynik zostanie zapisany obok pliku wejściowego (np. `examples/showcase.svg`).
+Wynik zostanie zapisany jako:
 
-Podgląd drzewa składniowego (AST) zamiast generowania SVG:
+```text
+examples/showcase.svg
+```
+
+---
+
+## Wyświetlenie AST (drzewa składniowego)
 
 ```bash
 python main.py examples/showcase.draw --ast
 ```
 
-### Przykłady użycia
+---
 
-```bash
-# Kompletny przykład pokazujący wszystkie funkcje
-python main.py examples/showcase.draw
+# Przykład użycia
 
-# Testy jednostkowe wszystkich funkcjonalności
-python main.py examples/complex.draw
+## Program wejściowy
 
-# Zaawansowane przykłady
-python main.py examples/advanced.draw
+```drawlang
+canvas 300 300
+
+color "#ff0000"
+
+circle 150 150 50
+
+line 0 0 300 300
 ```
+
+---
+
+## Wynik SVG
+
+```xml
+<svg width="300" height="300">
+  <circle cx="150" cy="150" r="50"
+          stroke="#ff0000"
+          fill="#ff0000" />
+
+  <line x1="0" y1="0"
+        x2="300" y2="300"
+        stroke="#ff0000" />
+</svg>
+```
+
+---
+
+# Struktura projektu
+
+```text
+DrawLang/
+├── examples/
+│   ├── test_simple_showcase.draw
+│   ├── test.draw
+│   ├── showcase.draw
+│   ├── mistakeInFile.draw
+│   ├── complex.draw
+│   ├── blank.draw
+│   └── advanced.draw
+├── grammar.lark
+├── interpreter.py
+├── main.py
+├── requirements.txt
+└── README.md
+```
+
+---
+
+# Możliwe rozszerzenia
+
+Planowane rozszerzenia projektu:
+
+- eksport do PNG,
+- dodatkowe figury geometryczne,
+- animacje SVG,
+- grupowanie elementów,
+- rotacje,
+- transformacje macierzowe,
+- obsługa tablic,
+- import plików.
+
+---
+
+# Wartość projektu
+
+Projekt demonstruje:
+
+- projektowanie własnego języka programowania,
+- tworzenie parsera i interpretera,
+- budowę AST,
+- implementację mechanizmów wykonawczych,
+- generowanie grafiki SVG,
+- praktyczne wykorzystanie formalnych gramatyk.
 
 ---
