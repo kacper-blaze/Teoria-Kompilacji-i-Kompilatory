@@ -43,9 +43,11 @@ Program:
 - interpretuje instrukcje programu,
 - generuje wynikowy plik SVG.
 
+### Interpreter własnego języka
+
 ---
 
-## Wynik działania programu
+
 
 Interpreter przyjmuje program zapisany w języku DrawLang i generuje:
 
