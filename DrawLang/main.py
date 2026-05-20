@@ -14,7 +14,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from lark import Lark
-from lark.exceptions import LarkError, UnexpectedCharacters
+from lark.exceptions import LarkError, UnexpectedCharacters, UnexpectedToken
 
 from interpreter import Interpreter
 
@@ -22,7 +22,7 @@ GRAMMAR_PATH = Path(__file__).with_name("grammar.lark")
 
 
 def build_parser() -> Lark:
-    return Lark(GRAMMAR_PATH.read_text(encoding="utf-8"), start="start")
+    return Lark(GRAMMAR_PATH.read_text(encoding="utf-8"), start="start", lexer="basic")
 
 
 def main(argv: list[str]) -> int:
@@ -36,10 +36,40 @@ def main(argv: list[str]) -> int:
     parser = build_parser()
     
     try:
-        tree = parser.parse(source_path.read_text(encoding="utf-8"))
-    except UnexpectedCharacters as e:
+        source_text = source_path.read_text(encoding="utf-8")
+        tree = parser.parse(source_text)
+    except (UnexpectedCharacters, UnexpectedToken) as e:
         print(f"Syntax error in {source_path}:")
-        print(f"  Line {e.line}, column {e.column}: {str(e)}")
+        
+        # Determine the position
+        line = getattr(e, "line", "?")
+        column = getattr(e, "column", "?")
+        
+        if isinstance(e, UnexpectedToken):
+            found = f"'{e.token.value}'"
+        else:
+            # UnexpectedCharacters has a different structure
+            found = f"'{source_text[e.pos_in_stream]}'" if hasattr(e, "pos_in_stream") else "unknown character"
+
+        print(f"  Unexpected {found} at line {line}, column {column}.")
+        
+        # Show context if available
+        try:
+            print("\n" + e.get_context(source_text))
+        except Exception:
+            pass
+
+        if isinstance(e, UnexpectedToken) and e.expected:
+            # Simple heuristic to clean up terminal names
+            clean_expected = []
+            for term in e.expected:
+                if term.startswith("__ANON"): continue # Skip anonymous terminals
+                name = term.lstrip("_")
+                clean_expected.append(name.lower() if term.startswith("_") else name)
+            
+            if clean_expected:
+                print(f"  Expected one of: {', '.join(sorted(set(clean_expected)))}")
+
         return 1
     except LarkError as e:
         print(f"Parse error in {source_path}: {e}")

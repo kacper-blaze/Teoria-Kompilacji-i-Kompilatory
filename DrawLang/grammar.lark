@@ -26,26 +26,26 @@ program: statement*
 block: "{" statement* "}"
 
 // --- variables --------------------------------------------------------
-var_decl:    "let" IDENTIFIER "=" expr
+var_decl:    _LET IDENTIFIER "=" expr
 assign_stmt: IDENTIFIER "=" expr
 
 // --- control flow -----------------------------------------------------
-if_stmt:     "if" expr block ("else" (if_stmt | block))?
+if_stmt:     _IF expr block (_ELSE (if_stmt | block))?
 
-while_stmt:  "while" expr block
+while_stmt:  _WHILE expr block
 
-for_stmt:    "for" IDENTIFIER "=" expr "to" expr ("step" expr)? block
+for_stmt:    _FOR IDENTIFIER "=" expr _TO expr (_STEP expr)? block
 
-repeat_stmt: "repeat" expr block
+repeat_stmt: _REPEAT expr block
 
-break_stmt:    "break"
-continue_stmt: "continue"
+break_stmt:    _BREAK
+continue_stmt: _CONTINUE
 
 // --- procedures -------------------------------------------------------
-proc_decl:   "proc" IDENTIFIER "(" params? ")" block
+proc_decl:   _PROC IDENTIFIER "(" params? ")" block
 params:      IDENTIFIER ("," IDENTIFIER)*
 
-return_stmt: "return" [expr]
+return_stmt: _RETURN [expr]
 
 call_stmt:   IDENTIFIER "(" args? ")"
 args:        expr ("," expr)*
@@ -62,28 +62,28 @@ args:        expr ("," expr)*
            | translate_stmt
            | scale_stmt
 
-canvas_stmt:    "canvas"    expr expr
-circle_stmt:    "circle"    expr expr expr
-line_stmt:      "line"      expr expr expr expr
-rect_stmt:      "rect"      expr expr expr expr
+canvas_stmt:    _CANVAS    expr expr
+circle_stmt:    _CIRCLE    expr expr expr
+line_stmt:      _LINE      expr expr expr expr
+rect_stmt:      _RECT      expr expr expr expr
 
-color_stmt:     "color" color_value
+color_stmt:     _COLOR color_value
 color_value:    HEX_COLOR | STRING | IDENTIFIER
 
-translate_stmt: "translate" expr expr
-scale_stmt:     "scale"     expr
+translate_stmt: _TRANSLATE expr expr
+scale_stmt:     _SCALE     expr
 
 // ---------------------------------------------------------------------
 // Expressions (logic and arithmetic)
 // ---------------------------------------------------------------------
 
-?expr:       logical_expr | arithmetic_expr
+?expr:       logical_expr
 
 // --- Logic exressions ------------------------------------------------
 ?logical_expr: or_expr
-?or_expr:     and_expr ("or" and_expr)*
-?and_expr:    not_expr ("and" not_expr)*
-?not_expr:    "not" not_expr -> not_op
+?or_expr:     and_expr (_OR and_expr)*
+?and_expr:    not_expr (_AND not_expr)*
+?not_expr:    _NOT not_expr -> not_op
              | logical_comparison
 ?logical_comparison: arithmetic_expr (cmp_op arithmetic_expr)?
 !cmp_op:      "==" | "!=" | "<=" | ">=" | "<" | ">"
@@ -110,11 +110,39 @@ scale_stmt:     "scale"     expr
      | IDENTIFIER -> var
      | "(" expr ")"
 
-bool_lit: "true" | "false"
+bool_lit: _TRUE | _FALSE
 
 // ---------------------------------------------------------------------
 // Terminals
 // ---------------------------------------------------------------------
+
+_CANVAS:    "canvas"
+_CIRCLE:    "circle"
+_LINE:      "line"
+_RECT:      "rect"
+_COLOR:     "color"
+_TRANSLATE: "translate"
+_SCALE:     "scale"
+
+_LET:       "let"
+_IF:        "if"
+_ELSE:      "else"
+_WHILE:     "while"
+_FOR:       "for"
+_TO:        "to"
+_STEP:      "step"
+_REPEAT:    "repeat"
+_PROC:      "proc"
+_RETURN:    "return"
+_BREAK:     "break"
+_CONTINUE:  "continue"
+
+_OR:        "or"
+_AND:       "and"
+_NOT:       "not"
+
+_TRUE:      "true"
+_FALSE:     "false"
 
 HEX_COLOR: /#[0-9a-fA-F]{6}/
 
