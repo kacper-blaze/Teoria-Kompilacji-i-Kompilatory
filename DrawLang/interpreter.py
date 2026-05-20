@@ -145,13 +145,15 @@ class Interpreter:
             self._eval_call_direct(ident, args, env)
 
         elif name == "canvas_stmt":
-            self._width = int(self._eval(node.children[0], env))
-            self._height = int(self._eval(node.children[1], env))
+            _validate_arg_count(node, 2, "canvas")
+            self._width = int(_validate_positive(self._eval(node.children[0], env), "canvas width"))
+            self._height = int(_validate_positive(self._eval(node.children[1], env), "canvas height"))
 
         elif name == "circle_stmt":
-            x = self._eval(node.children[0], env)
-            y = self._eval(node.children[1], env)
-            r = self._eval(node.children[2], env)
+            _validate_arg_count(node, 3, "circle")
+            x = _validate_number(self._eval(node.children[0], env), "circle x")
+            y = _validate_number(self._eval(node.children[1], env), "circle y")
+            r = _validate_non_negative(self._eval(node.children[2], env), "circle radius")
             tx, ty = self._apply_transform(x, y)
             r2 = r * self._scale
             color_attr = self._color_attr()
@@ -160,10 +162,11 @@ class Interpreter:
             )
 
         elif name == "line_stmt":
-            x1 = self._eval(node.children[0], env)
-            y1 = self._eval(node.children[1], env)
-            x2 = self._eval(node.children[2], env)
-            y2 = self._eval(node.children[3], env)
+            _validate_arg_count(node, 4, "line")
+            x1 = _validate_number(self._eval(node.children[0], env), "line x1")
+            y1 = _validate_number(self._eval(node.children[1], env), "line y1")
+            x2 = _validate_number(self._eval(node.children[2], env), "line x2")
+            y2 = _validate_number(self._eval(node.children[3], env), "line y2")
             tx1, ty1 = self._apply_transform(x1, y1)
             tx2, ty2 = self._apply_transform(x2, y2)
             color_attr = self._color_attr("line")
@@ -173,10 +176,11 @@ class Interpreter:
             )
 
         elif name == "rect_stmt":
-            x = self._eval(node.children[0], env)
-            y = self._eval(node.children[1], env)
-            w = self._eval(node.children[2], env)
-            h = self._eval(node.children[3], env)
+            _validate_arg_count(node, 4, "rect")
+            x = _validate_number(self._eval(node.children[0], env), "rect x")
+            y = _validate_number(self._eval(node.children[1], env), "rect y")
+            w = _validate_non_negative(self._eval(node.children[2], env), "rect width")
+            h = _validate_non_negative(self._eval(node.children[3], env), "rect height")
             tx, ty = self._apply_transform(x, y)
             w2 = w * self._scale
             h2 = h * self._scale
@@ -195,11 +199,16 @@ class Interpreter:
                 self._color = str(color_node).strip('"')
 
         elif name == "translate_stmt":
-            self._translate_x = float(self._eval(node.children[0], env))
-            self._translate_y = float(self._eval(node.children[1], env))
+            _validate_arg_count(node, 2, "translate")
+            self._translate_x = _validate_number(self._eval(node.children[0], env), "translate x")
+            self._translate_y = _validate_number(self._eval(node.children[1], env), "translate y")
 
         elif name == "scale_stmt":
-            self._scale = float(self._eval(node.children[0], env))
+            _validate_arg_count(node, 1, "scale")
+            scale_value = _validate_number(self._eval(node.children[0], env), "scale")
+            if scale_value == 0:
+                raise ValueError("scale cannot be zero")
+            self._scale = scale_value
 
         else:
             pass  # unknown node – silently skip
@@ -542,3 +551,29 @@ def _fmt(v: float) -> str:
     if isinstance(v, float) and v.is_integer():
         return str(int(v))
     return f"{v:.4g}"
+
+def _validate_number(value: Any, name: str) -> float:
+    """Validate that a value is a number and return it as float."""
+    if not isinstance(value, (int, float)):
+        raise TypeError(f"{name} must be a number, got {type(value).__name__}")
+    return float(value)
+
+def _validate_positive(value: Any, name: str) -> float:
+    """Validate that a value is a positive number."""
+    num = _validate_number(value, name)
+    if num <= 0:
+        raise ValueError(f"{name} must be positive, got {num}")
+    return num
+
+def _validate_non_negative(value: Any, name: str) -> float:
+    """Validate that a value is a non-negative number."""
+    num = _validate_number(value, name)
+    if num < 0:
+        raise ValueError(f"{name} must be non-negative, got {num}")
+    return num
+
+def _validate_arg_count(node: Tree, expected: int, stmt_name: str) -> None:
+    """Validate that a statement has the expected number of arguments."""
+    actual = len(node.children)
+    if actual != expected:
+        raise ValueError(f"{stmt_name} requires {expected} argument(s), got {actual}")

@@ -14,6 +14,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from lark import Lark
+from lark.exceptions import LarkError, UnexpectedCharacters
 
 from interpreter import Interpreter
 
@@ -33,14 +34,27 @@ def main(argv: list[str]) -> int:
     source_path = Path(argv[1])
 
     parser = build_parser()
-    tree = parser.parse(source_path.read_text(encoding="utf-8"))
+    
+    try:
+        tree = parser.parse(source_path.read_text(encoding="utf-8"))
+    except UnexpectedCharacters as e:
+        print(f"Syntax error in {source_path}:")
+        print(f"  Line {e.line}, column {e.column}: {str(e)}")
+        return 1
+    except LarkError as e:
+        print(f"Parse error in {source_path}: {e}")
+        return 1
 
     if show_ast:
         print(tree.pretty())
         return 0
 
-    interp = Interpreter()
-    svg = interp.run(tree)
+    try:
+        interp = Interpreter()
+        svg = interp.run(tree)
+    except (ValueError, TypeError, NameError) as e:
+        print(f"Runtime error in {source_path}: {e}")
+        return 1
 
     out_path = source_path.with_suffix(".svg")
     out_path.write_text(svg, encoding="utf-8")
