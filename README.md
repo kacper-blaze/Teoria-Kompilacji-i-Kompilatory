@@ -1,4 +1,4 @@
 # Folder do zajęć z Teorii kompilacji i kompilatorów
 zawartość:
-- skaner wyrażeń matematycznych z kolorowaniem składni
-- interpreter języka do rysowania (hopefully)
+- skaner - skaner z kolorowaniem składni
+- DrawLang – język dziedzinowy do grafiki wektorowej
